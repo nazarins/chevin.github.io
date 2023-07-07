@@ -124,11 +124,17 @@
 
     <!-- Dummy Menu -->
     <ul class="menu-list">
-        <li onclick="handleMenuItemClick()">Report for State - Depot mismatch</li>
-        <li>Edit</li>
-        <li>View</li>
-        <li>Window</li>
-        <li>Help</li>
+        <li onclick="handleMenuItemClick1()">Report for State - Depot mismatch</li>
+        <li onclick="handleMenuItemClick2()">Report for Pool - Vehicle type mismatch</li>
+        <li>Incorrect Workflow Report</li>
+	<li>Missing Data Reports<ul>
+		<li>Active/compliant</li>
+		<li>Invalid/Overdue</li>
+		<li>Onboarding - In progress</li>
+		<li>Onboarding - Not started</li>
+	</ul></li>
+        <li>Pool Changes</li>
+        <li>Depot Changes</li>
     </ul>
 </div>
 <!-- Bootstrap JS dependencies -->
@@ -151,6 +157,62 @@
         ['UNKNOWN', 'NA'],
                                 
     ];
+
+const pool_map = [
+	['VEHICLE_LIBERTY','RETIRED','RETIRED'],
+	['VEHICLE_LIBERTY','SYS_TESTING','SDC'],
+	['VEHICLE_LIBERTY','SIDELINED','SDC'],
+	['VEHICLE_LIBERTY','STANDBY','SDC'],
+	['VEHICLE_LIBERTY','DURABILITY','SDC'],
+	['VEHICLE_LIBERTY','CANARY','SDC'],
+	['VEHICLE_LIBERTY','DELIVERY','SDC'],
+	['VEHICLE_LIBERTY','OPS','TaaS'],
+	['VEHICLE_LIBERTY','BRING_UP','TaaS'],
+	['VEHICLE_LIBERTY','DRIVERLESS_STANDBY','TaaS'],
+	['VEHICLE_LIBERTY','DRIVERLESS','TaaS'],
+	['VEHICLE_LIBERTY','TDC_CUSTOMER_BACKUP','TaaS'],
+	['VEHICLE_LIBERTY','DRIVERLESS_BRINGUP','TaaS'],
+	['VEHICLE_LIBERTY','SPECIAL_OPS',''],
+	['VEHICLE_LIBERTY','UNSPECIFIED',''],
+	['VEHICLE_V5','RETIRED','RETIRED'],
+	['VEHICLE_V5','SYS_TESTING','SDC'],
+	['VEHICLE_V5','SIDELINED','SDC'],
+	['VEHICLE_V5','STANDBY','SDC'],
+	['VEHICLE_V5','DURABILITY','SDC'],
+	['VEHICLE_V5','CANARY','SDC'],
+	['VEHICLE_V5','DELIVERY','SDC'],
+	['VEHICLE_V5','OPS','TaaS'],
+	['VEHICLE_V5','BRING_UP','TaaS'],
+	['VEHICLE_V5','DRIVERLESS_STANDBY','TaaS'],
+	['VEHICLE_V5','DRIVERLESS','TaaS'],
+	['VEHICLE_V5','TDC_CUSTOMER_BACKUP','TaaS'],
+	['VEHICLE_V5','DRIVERLESS_BRINGUP','TaaS'],
+	['VEHICLE_V5','SPECIAL_OPS',''],
+	['VEHICLE_V5','UNSPECIFIED',''],
+	['VEHICLE_AUX','RETIRED','non-SDC'],
+	['VEHICLE_AUX','OPS','non-SDC'],
+	['VEHICLE_AUX','SIDELINED','non-SDC'],
+	['VEHICLE_AUX','SYS_TESTING','non-SDC'],
+	['VEHICLE_AUX','UNSPECIFIED',''],
+	['VEHICLE_HUSKY','RETIRED',''],
+	['VEHICLE_OPTIMUS','SYS_TESTING',''],
+	['VEHICLE_OPTIMUS','CANARY',''],
+	['VEHICLE_OPTIMUS','DURABILITY',''],
+	['VEHICLE_OPTIMUS','STANDBY',''],
+	['VEHICLE_OPTIMUS','BRING_UP',''],
+	['VEHICLE_OPTIMUS','OPS',''],
+	['VEHICLE_OPTIMUS','RETIRED',''],
+	['VEHICLE_OPTIMUS','DRIVERLESS',''],
+	['VEHICLE_OPTIMUS','DRIVERLESS_STANDBY',''],
+	['VEHICLE_OPTIMUS','DELIVERY',''],
+	['VEHICLE_TRAILER','RETIRED',''],
+	['VEHICLE_TRAILER','OPS','Trailer'],
+	['VEHICLE_TRAILER','DEMO','Trailer'],
+	['VEHICLE_TRAILER','DELIVERY','Trailer'],
+	['VEHICLE_TRAILER','SYS_TESTING','Trailer']
+];
+
+
     var downloadLink;
     // JavaScript code to display the selected file name
     const fileInput = document.getElementById('file-input');
@@ -160,7 +222,7 @@
         selectedFile.textContent = fileInput.files[0].name;
     });
  
-    function handleMenuItemClick() {
+    function handleMenuItemClick1() {
     if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         Papa.parse(file, {
@@ -171,6 +233,22 @@
 		var statecolumn = matchStringToColumnHeader(results.data, 'Vehicle state');
 		//console.log(parseInt(statecolumn) + 1);
 		StateDepotMappingCheck(results.data,depotcolumn,statecolumn);
+            }
+        });
+    } else {
+        alert('Please select a file first.');
+    }
+}
+
+function handleMenuItemClick2() {
+if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        Papa.parse(file, {
+            complete: function (results) {
+                var vehicle_category = matchStringToColumnHeader(results.data, 'Carman Vehicle category');
+		var pool = matchStringToColumnHeader(results.data, 'Pool');
+		var vehicle_type = matchStringToColumnHeader(results.data, 'Vehicle type');
+		PoolTypeMappingCheck(results.data,vehicle_category,pool,vehicle_type);
             }
         });
     } else {
@@ -201,8 +279,8 @@ function StateDepotMappingCheck(data, depotcolumn, statecolumn) {
   var expected_state;
   var report = [['Vehicle ID', 'Current Depot', 'Current State']];
 
-  for (i = 1; i < 1429; i++) {
-    vehicle_depot = data[i][depotcolumn];
+  for (i = 1; i < 1430; i++) {
+    var vehicle_depot = data[i][depotcolumn];
     for (j = 0; j < 11; j++) {
       if (mapping[j][0] == vehicle_depot) {
         expected_state = mapping[j][1];
@@ -240,6 +318,54 @@ function StateDepotMappingCheck(data, depotcolumn, statecolumn) {
       document.body.removeChild(downloadLink); // Remove download link if exists
     }
   }
+}
+
+
+function PoolTypeMappingCheck(data,vehicle_category,pool,vehicle_type)
+{
+	var expected_type;
+  	var report = [['Vehicle ID', 'Vehicle category', 'Pool', 'Current Vehicle Type', 'Expected Vehicle Type']];
+
+	for(i=0;i<1430;i++){
+		var veh_cat = data[i][vehicle_category];
+		var veh_pool = data[i][pool];
+		for(j=0;j<51;j++){
+			if((pool_map[j][0]==veh_cat) && (pool_map[j][1]==veh_pool)){
+				expected_type = pool_map[j][2];
+				if(data[i][vehicle_type] != expected_type) {
+					var vehicle_id_column = matchStringToColumnHeader(data, 'Vehicle ID');
+					report.push([data[i][vehicle_id_column], veh_cat, veh_pool, data[i][vehicle_type], expected_type]);
+        			}
+        			break;
+      			}
+    		}
+  	}
+
+  // Generate report as output
+  if (report.length > 1) {
+    // Convert report array to CSV format
+    var csvContent = "data:text/csv;charset=utf-8," + report.map(row => row.join(',')).join('\n');
+
+     // Create a download link
+    var encodedUri = encodeURI(csvContent);
+    if (downloadLink) {
+      document.body.removeChild(downloadLink); // Remove previous download link if exists
+    }
+    downloadLink = document.createElement("a");
+    downloadLink.setAttribute("href", encodedUri);
+    downloadLink.setAttribute("download", "report.csv");
+    downloadLink.innerHTML = "Download Report";
+
+    // Append the download link to the document body
+    document.body.appendChild(downloadLink);
+  } else {
+    console.log('No mismatch found. Report is empty.');
+    if (downloadLink) {
+      document.body.removeChild(downloadLink); // Remove download link if exists
+    }
+  }
+
+
 }
 
 
