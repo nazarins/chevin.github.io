@@ -8,34 +8,82 @@
     <style>
         /* Additional custom styles */
         body {
-            background-color: #f8f9fa;
+            background-color: #fafbfc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .file-input-section {
             background-color: #fff;
-            border-radius: 10px;
-            padding: 30px;
+            border: 1px solid #eaecef;
+            border-radius: 6px;
+            padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .custom-file-label::after {
-            content: "Browse";
+        .file-input-section .custom-file-input {
+            border: 1px solid #d1d5da;
+            border-radius: 3px;
+            color: #24292e;
+            padding: 6px 10px;
+            background-color: #f6f8fa;
+            transition: border-color 0.2s ease-in-out;
         }
 
-        #selected-file {
+        .file-input-section .custom-file-input:hover {
+            border-color: #c8e1ff;
+        }
+
+        .file-input-section .custom-file-input:focus {
+            border-color: #0366d6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.3);
+        }
+
+        .file-input-section .custom-file-label {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            color: #24292e;
+        }
+
+        .file-input-section .selected-file {
+            margin-top: 10px;
             font-style: italic;
+            color: #586069;
         }
 
         .menu-list {
-            list-style-type: decimal;
+            list-style: none;
+            padding: 0;
             margin-top: 20px;
-            padding-left: 20px;
+            border: 1px solid #eaecef;
+            border-radius: 6px;
+            background-color: #f6f8fa;
         }
 
         .menu-list li {
-            margin-bottom: 10px;
+            padding: 10px 20px;
+            border-bottom: 1px solid #eaecef;
+            color: #0366d6;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
         }
+
+        .menu-list li:hover {
+            background-color: #0366d6;
+            color: #fff;
+        }
+
+        .menu-list li:last-child {
+            border-bottom: none;
+        }
+
         .navbar {
             background-color: #6c757d;
             padding: 0.5rem 1rem;
@@ -46,53 +94,189 @@
             font-size: 1.5rem;
             font-weight: bold;
         }
+	.file-output-section {
+		text-align: left;
+	}
+
     </style>
 </head>
-<body>
-    <div class="container">
-         <nav class="navbar navbar-expand-lg">
-             <a class="navbar-brand" href="#">Logo</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button> </nav>
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
-                <div class="file-input-section">
-                    <div class="text-center mb-4">
-                        <h3>Upload your file</h3>
-                    </div>
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="file-input">
-                        <label class="custom-file-label" for="file-input">Choose file</label>
-                    </div>
-                    <div class="mt-3">
-                        <span id="selected-file"></span>
-                    </div>
-
-                    <!-- Dummy Menu -->
-                    <ul class="menu-list">
-                        <li>Home</li>
-                        <li>About</li>
-                        <li>Contact</li>
-                    </ul>
-                </div>
-            </div>
+<body> <br><br><br>
+<nav class="navbar navbar-expand-lg">
+    <center><a class="navbar-brand" href="#">CMS Vehicle monitoring</a></center>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</nav> <br><br>
+<div class="container">
+    <div class="file-input-section">
+        <div class="text-center mb-4">
+            <h3 class="mb-0">Upload your file</h3>
+        </div>
+        <div class="custom-file">
+            <input type="file" class="custom-file-input" id="file-input">
+            <label class="custom-file-label" for="file-input">Choose file</label>
+        </div>
+        <div class="mt-3">
+            <span class="selected-file" id="selected-file"></span>
         </div>
     </div>
 
-    <!-- Bootstrap JS dependencies -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Dummy Menu -->
+    <ul class="menu-list">
+        <li onclick="handleMenuItemClick()">Report for State - Depot mismatch</li>
+        <li>Edit</li>
+        <li>View</li>
+        <li>Window</li>
+        <li>Help</li>
+    </ul>
+</div>
+<!-- Bootstrap JS dependencies -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
-    <script>
-        // JavaScript code to display the selected file name
-        const fileInput = document.getElementById('file-input');
-        const selectedFile = document.getElementById('selected-file');
+<script>
+    const mapping = [
+        ['AUSTIN', 'TX'],
+        ['CASTLE', 'CA'],
+        ['DALLAS', 'TX'],
+        ['DETROIT', 'MI'],
+        ['LOS_ANGELES', 'CA'],
+        ['MESA', 'AZ'],
+        ['MOUNTAIN_VIEW', 'CA'],
+        ['PHOENIX', 'AZ'],
+        ['SAN_FRANCISCO', 'CA'],
+        ['TRC', 'OH'],
+        ['UNKNOWN', 'NA'],
+                                
+    ];
+    var downloadLink;
+    // JavaScript code to display the selected file name
+    const fileInput = document.getElementById('file-input');
+    const selectedFile = document.getElementById('selected-file');
 
-        fileInput.addEventListener('change', function() {
-            selectedFile.textContent = fileInput.files[0].name;
+    fileInput.addEventListener('change', function () {
+        selectedFile.textContent = fileInput.files[0].name;
+    });
+ 
+    function handleMenuItemClick() {
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        Papa.parse(file, {
+            complete: function (results) {
+                //displayCSVContents(results.data);
+                var depotcolumn = matchStringToColumnHeader(results.data, 'Depot');
+		//console.log(parseInt(depotcolumn) + 1);
+		var statecolumn = matchStringToColumnHeader(results.data, 'Vehicle state');
+		//console.log(parseInt(statecolumn) + 1);
+		StateDepotMappingCheck(results.data,depotcolumn,statecolumn);
+            }
         });
-    </script>
+    } else {
+        alert('Please select a file first.');
+    }
+}
+
+function matchStringToColumnHeader(data, searchString) {
+    const columnHeaderRow = data[0];
+    const matchingColumnIndices = columnHeaderRow.reduce((acc, column, index) => {
+        if (column === searchString) {
+            acc.push(index);
+        }
+        return acc;
+    }, []);
+
+    if (matchingColumnIndices.length > 0) {
+        //console.log(`The string "${searchString}" matches the following column(s):`);
+        //matchingColumnIndices.forEach(columnIndex => console.log(`Column number: ${columnIndex + 1}`));
+        return matchingColumnIndices; // Return the matching column indices
+    } else {
+        //console.log(`The string "${searchString}" does not match any column header.`);
+        return []; // Return an empty array if there are no matching columns
+    }
+}
+
+function StateDepotMappingCheck(data, depotcolumn, statecolumn) {
+  var expected_state;
+  var report = [['Vehicle ID', 'Current Depot', 'Current State']];
+
+  for (i = 1; i < 1429; i++) {
+    vehicle_depot = data[i][depotcolumn];
+    for (j = 0; j < 11; j++) {
+      if (mapping[j][0] == vehicle_depot) {
+        expected_state = mapping[j][1];
+        if (data[i][statecolumn] != expected_state) {
+          var vehicle_id_column = matchStringToColumnHeader(data, 'Vehicle ID');
+          var current_depot = data[i][depotcolumn];
+          var current_state = data[i][statecolumn];
+          report.push([data[i][vehicle_id_column], current_depot, current_state]);
+        }
+        break;
+      }
+    }
+  }
+
+  // Generate report as output
+  if (report.length > 1) {
+    // Convert report array to CSV format
+    var csvContent = "data:text/csv;charset=utf-8," + report.map(row => row.join(',')).join('\n');
+
+     // Create a download link
+    var encodedUri = encodeURI(csvContent);
+    if (downloadLink) {
+      document.body.removeChild(downloadLink); // Remove previous download link if exists
+    }
+    downloadLink = document.createElement("a");
+    downloadLink.setAttribute("href", encodedUri);
+    downloadLink.setAttribute("download", "report.csv");
+    downloadLink.innerHTML = "Download Report";
+
+    // Append the download link to the document body
+    document.body.appendChild(downloadLink);
+  } else {
+    console.log('No mismatch found. Report is empty.');
+    if (downloadLink) {
+      document.body.removeChild(downloadLink); // Remove download link if exists
+    }
+  }
+}
+
+
+    function displayCSVContents(data) {
+        const container = document.createElement('div');
+        container.classList.add('container');
+
+        const table = document.createElement('table');
+        table.classList.add('table', 'table-bordered');
+
+        // Create table header
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        for (let i = 0; i < data[0].length; i++) {
+            const th = document.createElement('th');
+            th.textContent = data[0][i];
+            headerRow.appendChild(th);
+        }
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Create table body
+        const tbody = document.createElement('tbody');
+        for (let i = 1; i < data.length; i++) {
+            const row = document.createElement('tr');
+            for (let j = 0; j < data[i].length; j++) {
+                const td = document.createElement('td');
+                td.textContent = data[i][j];
+                row.appendChild(td);
+            }
+            tbody.appendChild(row);
+        }
+        table.appendChild(tbody);
+
+        container.appendChild(table);
+        document.body.appendChild(container);
+    } 
+</script>
 </body>
 </html>
